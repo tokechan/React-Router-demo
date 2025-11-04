@@ -66,6 +66,11 @@
    docker-compose exec app php artisan migrate
    ```
 
+6. （任意）シーディングでテストユーザーを登録
+   ```bash
+   docker-compose exec app php artisan db:seed
+   ```
+
 ### フロントエンドのセットアップ
 
 1. フロントエンドディレクトリに移動
@@ -130,3 +135,14 @@ React-Router-demo/
 | GET     | /api/memos/{id} | 特定のメモを取得 |
 | PUT     | /api/memos/{id} | メモを更新 |
 | DELETE  | /api/memos/{id} | メモを削除 |
+
+## テストユーザー
+
+以下のコマンドでシーディングすると、開発用ユーザーが1件作成されます。
+
+```bash
+docker-compose exec app php artisan db:seed
+```
+
+- メールアドレス: `test@example.com`
+- パスワード: `password`

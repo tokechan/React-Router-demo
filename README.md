@@ -37,7 +37,8 @@ React-Router-demo/
 │   ├── docker-compose.yml       # バックエンド用 Docker Compose
 │   └── composer.json            # PHP 依存関係
 └── .github/workflows/
-    ├── lint.yml                 # ESLint & Prettier チェック
+    ├── ci.yml                   # ESLint / Prettier / テスト
+    ├── lint.yml                 # PR 用 ESLint & Prettier チェック
     └── deploy-pages.yml         # Cloudflare Pages 用デプロイ
 ```
 
@@ -86,6 +87,7 @@ DB をリセットする場合は `docker compose exec app php artisan migrate:f
 
 - `npm run lint`（ESLint）と `npm run format:check`（Prettier）でローカル確認が可能。
 - `.github/workflows/lint.yml` で PR / push 時に自動チェック。違反がある場合は CI が失敗します。
+- CI を通す目的は、スタイル・静的解析のルールを自動で適用し、レビュー前にコーディング規約違反や基本的なバグを早期に検出することです。チェックに失敗すれば後続のデプロイも止まるため、品質を維持した状態だけが本番環境へ進むようになっています。
 
 ## Cloudflare Pages への自動デプロイ
 

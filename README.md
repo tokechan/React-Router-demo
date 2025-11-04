@@ -1,175 +1,98 @@
-# 共有メモアプリ
+# React × Laravel デモアプリケーション
 
-共有できるシンプルなメモアプリケーションを作成。
-「メモっとくね」や「ちゃんとやった？」などのステータスを持つメモを管理できます。 
+フロントエンド（React + Vite）とバックエンド（Laravel 11 API）をまとめて検証できるサンプル構成です。Docker Compose でバックエンドを立ち上げつつ、フロントエンドは Node.js で起動します。単体の起動手順も用意しているので、Docker を使わない検証も可能です。
 
-## 概要
-
-このアプリケーションは、タスクやメモを共有するためのプラットフォームを提供します。
-日常生活の小さなタスクを管理することができます。
-
-### 主な機能
-
-- メモの作成、表示、編集、削除
-- メモのステータス管理（「メモっとくね」「ちゃんとやった？」）
-- 作成者の記録（夫/妻）
-- 完了状態の管理
-
-## 技術スタック
-
-### バックエンド
-- **フレームワーク**: Laravel 11
-- **データベース**: MySQL 8.0
-- **コンテナ化**: Docker & Docker Compose
-- **Web サーバー**: Nginx
-- **データベース管理**: Adminer
-
-### フロントエンド
-- **フレームワーク**: React
-- **HTTP クライアント**: Axios
-- **スタイリング**: CSS
-## セットアップ方法
-
-### 前提条件
-- Docker と Docker Compose がインストールされていること
-- Node.js と npm がインストールされていること
-
-### バックエンドのセットアップ
-
-1. リポジトリをクローン
-   ```bash
-   git clone <リポジトリURL>
-   cd React-Router-demo
-   ```
-
-2. バックエンドディレクトリに移動し依存関係をインストール
-   ```bash
-   cd backend
-   composer install
-   ```
-
-3. 環境変数ファイルを作成してアプリキーを生成
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-4. Docker コンテナを起動  
-   ※ Intel/AMD 環境ではそのまま、Apple Silicon では `docker-compose.yml` の `platform` 行をコメント解除してください。
-   ```bash
-   docker-compose up -d
-   ```
-
-5. マイグレーションを実行
-   ```bash
-   docker-compose exec app php artisan migrate
-   ```
-
-6. （任意）シーディングでテストユーザーを登録
-   ```bash
-   docker-compose exec app php artisan db:seed
-   ```
-
-### フロントエンドのセットアップ
-
-1. フロントエンドディレクトリに移動
-   ```bash
-   cd ../frontend
-   ```
-
-2. 依存関係をインストール
-   ```bash
-   npm install
-   ```
-
-3. 環境変数ファイルを作成
-   ```bash
-   cp .env.example .env
-   ```
-
-4. 開発サーバーを起動
-   ```bash
-   npm run dev
-   ```
-
-5. コード品質チェック（任意）
-   ```bash
-   npm run lint          # ESLint
-   npm run format:check  # Prettier
-   ```
-
-## プロジェクト構造
+## プロジェクト構成
 
 ```
 React-Router-demo/
-├── backend/         # Laravel バックエンド
-│   ├── app/         # アプリケーションコード
-│   │   └── Http/Controllers/API/  # APIコントローラー
-│   ├── config/      # 設定ファイル
-│   ├── database/    # マイグレーションとシード
-│   ├── docker/      # Docker設定
-│   ├── routes/      # ルート定義
-│   └── ...
-├── frontend/        # React フロントエンド
-│   ├── src/         # ソースコード
-│   │   ├── components/  # UIコンポーネント
-│   │   ├── api/     # APIクライアント
-│   │   ├── context/ # 認証・メモの状態管理
-│   │   └── ...
-│   └── ...
-└── .gitignore       # Git無視設定
+├── frontend/                    # React TypeScript アプリ
+│   ├── public/                  # 静的ファイル
+│   ├── src/
+│   │   ├── api/                 # Axios クライアント
+│   │   ├── components/
+│   │   │   ├── atoms/           # Atomic Design: atoms
+│   │   │   ├── molecules/       # Atomic Design: molecules
+│   │   │   └── organisms/       # Atomic Design: organisms
+│   │   ├── context/             # Auth/Memo コンテキスト
+│   │   ├── hooks/               # カスタムフック
+│   │   ├── pages/               # 画面コンポーネント
+│   │   ├── schemas/             # Zod スキーマ
+│   │   ├── services/            # 認証サービスなど
+│   │   ├── types.ts             # 型定義
+│   │   ├── App.tsx              # ルートコンポーネント
+│   │   └── main.tsx             # エントリーポイント
+│   ├── vite.config.ts           # Vite 設定
+│   ├── eslint.config.js         # ESLint (Flat Config)
+│   ├── .prettierrc.json / .prettierignore
+│   └── package.json             # 依存関係
+├── backend/                     # Laravel API
+│   ├── app/
+│   │   ├── Http/Controllers/    # API コントローラー (Memo/Auth)
+│   │   └── Models/              # モデル (Memo, User)
+│   ├── config/                  # 設定ファイル
+│   ├── database/                # マイグレーション / シーダー
+│   ├── docker/                  # Nginx 設定
+│   ├── routes/                  # api.php など
+│   ├── docker-compose.yml       # バックエンド用 Docker Compose
+│   └── composer.json            # PHP 依存関係
+└── .github/workflows/
+    ├── lint.yml                 # ESLint & Prettier チェック
+    └── deploy-pages.yml         # Cloudflare Pages 用デプロイ
 ```
 
-## データベース構造
+## ローカルセットアップ
 
-**memos テーブル**:
-- `id`: 主キー
-- `content`: メモの内容（text型）
-- `status`: ステータス（string型、デフォルト「メモっとくね」）
-- `creator`: 作成者（夫/妻）（string型）
-- `completed`: 完了フラグ（boolean型、デフォルトfalse）
-- `created_at`: 作成日時
-- `updated_at`: 更新日時
+### 前提条件
+- Docker / Docker Compose
+- Node.js / npm
 
-## API エンドポイント
-
-| メソッド | エンドポイント | 説明 |
-|---------|--------------|------|
-| GET     | /api/memos   | すべてのメモを取得 |
-| POST    | /api/memos   | 新しいメモを作成 |
-| GET     | /api/memos/{id} | 特定のメモを取得 |
-| PUT     | /api/memos/{id} | メモを更新 |
-| DELETE  | /api/memos/{id} | メモを削除 |
-
-## テストユーザー
-
-以下のコマンドでシーディングすると、開発用ユーザーが1件作成されます。
+### バックエンド
 
 ```bash
-docker-compose exec app php artisan db:seed
+git clone <repository>
+cd React-Router-demo/backend
+composer install
+cp .env.example .env
+php artisan key:generate
+docker compose up -d
+docker compose exec app php artisan migrate
+docker compose exec app php artisan db:seed    # テストユーザー投入（任意）
 ```
+
+### フロントエンド
+
+```bash
+cd ../frontend
+npm install
+cp .env.example .env
+npm run dev
+
+# スタイルチェック
+npm run lint
+npm run format:check
+```
+
+DB をリセットする場合は `docker compose exec app php artisan migrate:fresh --seed` を使用してください。
+
+## 動作確認ユーザー
+
+シーディングすると以下のユーザーが作成されます。
 
 - メールアドレス: `test@example.com`
 - パスワード: `password`
 
-## ローカル起動まとめ
+## 品質チェックと CI
 
-初回セットアップが完了した後の起動手順は以下の通りです。
+- `npm run lint`（ESLint）と `npm run format:check`（Prettier）でローカル確認が可能。
+- `.github/workflows/lint.yml` で PR / push 時に自動チェック。違反がある場合は CI が失敗します。
 
-```bash
-# backend
-cd backend
-docker compose up -d
-docker compose exec app php artisan migrate --seed  # DB 初期化＆テストユーザー投入
+## Cloudflare Pages への自動デプロイ
 
-# frontend（別ターミナル）
-cd ../frontend
-npm run dev
-```
-
-DB をリセットしたい場合は `docker compose exec app php artisan migrate:fresh --seed` を実行してください。
-
-## 品質チェックとCI
-
-- フロントエンドでは ESLint と Prettier を導入しています。`npm run lint` や `npm run format`, `npm run format:check` で手元のコードを検証・整形できます。
-- `.github/workflows/lint.yml` に GitHub Actions ワークフローを追加しており、PR/主要ブランチへの push 時に `npm run lint` と `npm run format:check` が自動実行されます。違反がある場合は CI が失敗し、PR がマージできない状態になります。
+- `.github/workflows/deploy-pages.yml` により、`main` ブランチへの push または手動実行で Cloudflare Pages へビルド＆デプロイします。
+- GitHub リポジトリに以下のシークレットを登録してください。  
+  - `CLOUDFLARE_ACCOUNT_ID`  
+  - `CLOUDFLARE_API_TOKEN`（Pages:Edit 権限付き）  
+  - `CLOUDFLARE_PAGES_PROJECT_NAME`
+- Cloudflare Pages ダッシュボードの「Settings > Environment Variables」で `VITE_API_BASE_URL` などの環境変数を設定します（Preview / Production 個別設定が可能）。
+- ワークフロー内では `npm run ci:lint` → `npm run build` → `frontend/dist` をアップロードするため、Lint/Prettier を通過しないコードはデプロイされません。
